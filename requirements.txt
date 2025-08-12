@@ -1,0 +1,7 @@
+streamlit
+yfinance
+pandas
+openpyxl
+fuzzywuzzy
+python-Levenshtein
+openai
