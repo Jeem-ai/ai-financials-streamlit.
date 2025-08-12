@@ -121,6 +121,13 @@ def generate_excel(symbols: list) -> bytes:
 
 # ---------- UI ----------
 st.title("📊 AI-Powered Indian Stock Financials (Streamlit Cloud)")
+# ✅ Privacy note
+st.warning(
+    "⚠ *Privacy Notice:* This app does not store your inputs or data. "
+    "If OpenAI parsing is enabled, your query text is sent securely to OpenAI for processing. "
+    "Do not enter personal, confidential, or sensitive information."
+)
+
 st.caption("Income, Balance Sheet, Cash Flow (Annual & Quarterly) • ₹ Crore • YoY/QoQ growth • Excel export")
 
 q = st.text_input(
