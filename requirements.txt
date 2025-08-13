@@ -5,3 +5,5 @@ openpyxl
 fuzzywuzzy
 python-Levenshtein
 openai
+requests
+lxml
