@@ -41,7 +41,7 @@ footer {visibility: hidden;} /* cleaner footer */
 # ---------- Header / Hero ----------
 col1, col2 = st.columns([0.75, 0.25])
 with col1:
-    st.markdown("### 📊 AI‑Powered Financials")
+    st.markdown("### 📊 FinXport")
     st.markdown(
         '<div class="hero">Fetch, compare, and export *Income, Balance Sheet, Cash Flow* for '
         '*Indian (₹ Crore)* and *Global (reported currency)* companies. Built for speed & clarity.</div>',
