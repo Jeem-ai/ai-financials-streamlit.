@@ -1,1 +1,1 @@
-# ai-financials-streamlit.
+# FinXport-streamlit.
