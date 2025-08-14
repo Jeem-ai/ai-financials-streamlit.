@@ -178,7 +178,7 @@ def build_summary_row(symbol, data):
     return out
 
 # ---------- Tabs: Discover / Quick Search / Settings ----------
-tab1, tab2, tab3 = st.tabs(["🧭 Discover & Compare", "🔎 Quick Search", "⚙ Settings"])
+tab1, tab3 = st.tabs(["🧭 Discover & Compare", "⚙ Settings"])
 
 with tab1:
     # Filters row
@@ -277,119 +277,6 @@ with tab1:
                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                            use_container_width=True)
 
-with tab2:
-    st.write("Type names or tickers (comma or space separated).")
-    q = st.text_input("e.g., Reliance, TCS, AAPL, MSFT", value="")
-
-    # ---- Detect tickers from free text ----
-    def detect_symbols(text: str):
-        if not text.strip():
-            return []
-        # LLM parse (optional)
-        if OPENAI_API_KEY:
-            try:
-                prompt = f'Extract company names/tickers from: "{text}". Return a comma-separated list only.'
-                resp = openai.ChatCompletion.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role":"user","content":prompt}]
-                )
-                parsed = resp.choices[0].message["content"].strip()
-                cands = [x.strip() for x in parsed.split(",") if x.strip()]
-            except Exception:
-                cands = [x.strip() for x in text.replace(" and ", ",").split(",") if x.strip()]
-        else:
-            cands = [x.strip() for x in text.replace(" and ", ",").split(",") if x.strip()]
-
-        # Map India names to tickers; accept ticker-looking strings for global
-        name_map = {r["name"]: r["symbol"] for _, r in india_universe.iterrows()}
-        symbols = []
-        for item in cands:
-            if item in name_map:
-                symbols.append(name_map[item])
-            else:
-                # Accept raw tickers like AAPL, 7203.T, 0700.HK, BRK-B, INFY.NS
-                if re.match(r"^[A-Z0-9\-]+(\.[A-Z]{1,3})?$", item.upper()):
-                    symbols.append(item.upper())
-                else:
-                    match = process.extractOne(item, list(name_map.keys()))
-                    if match and match[1] > 82:
-                        symbols.append(name_map[match[0]])
-        # de-dup while preserving order
-        seen = set(); out = []
-        for s in symbols:
-            if s not in seen:
-                out.append(s); seen.add(s)
-        return out
-
-    colA, colB = st.columns([0.35, 0.65])
-    with colA:
-        detect = st.button("Detect", use_container_width=True)
-    with colB:
-        fetch_now = st.button("Quick Fetch (only these)", use_container_width=True)
-
-    # Keep detected list in session state so the two buttons can be used separately
-    if "quick_symbols" not in st.session_state:
-        st.session_state.quick_symbols = []
-
-    if detect:
-        st.session_state.quick_symbols = detect_symbols(q)
-        if st.session_state.quick_symbols:
-            st.success("Detected: " + ", ".join(st.session_state.quick_symbols))
-        else:
-            st.warning("No valid tickers detected. Try official names or tickers (e.g., MARUTI.NS, AAPL).")
-
-    # ---- Fetch ONLY the detected symbols ----
-    if fetch_now:
-        symbols = detect_symbols(q) if not st.session_state.quick_symbols else st.session_state.quick_symbols
-        if not symbols:
-            st.warning("Nothing to fetch — please enter company names/tickers and click Detect.")
-            st.stop()
-
-        st.info("Fetching: " + ", ".join(symbols))
-        progress = st.progress(0.0)
-        rows, results, failures = [], {}, []
-        for i, sym in enumerate(symbols, start=1):
-            try:
-                data = fetch_company_data(sym)
-                if any(isinstance(v, pd.DataFrame) and not v.empty for v in data.values()):
-                    results[sym] = data
-                    rows.append(build_summary_row(sym, data))
-                else:
-                    failures.append(sym)
-            except Exception:
-                failures.append(sym)
-            progress.progress(i/len(symbols))
-
-        if failures:
-            st.warning("No fundamentals found for: " + ", ".join(failures))
-
-        summary = pd.DataFrame(rows)
-        fmt = {}
-        for col in ["Latest Revenue","Latest Net Income"]:
-            if col in summary.columns and pd.api.types.is_numeric_dtype(summary[col]):
-                fmt[col] = "{:,.2f}"
-
-        st.subheader("📌 Quick Summary")
-        st.dataframe(summary.style.format(fmt) if fmt else summary, use_container_width=True)
-
-        # Export only these to Excel
-        from io import BytesIO
-        bio = BytesIO()
-        with pd.ExcelWriter(bio, engine="openpyxl") as writer:
-            summary.to_excel(writer, sheet_name="Quick_Combined", index=False)
-            for sym, data in results.items():
-                for key, df in data.items():
-                    if isinstance(df, pd.DataFrame) and not df.empty:
-                        df = df.rename(columns={"index":"Metric"})
-                        df.to_excel(writer, sheet_name=f"{sym}_{key}"[:31], index=False)
-        bio.seek(0)
-        st.download_button(
-            "📥 Download Quick Excel",
-            data=bio.read(),
-            file_name="financials_quick.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
 with tab3:
     st.write("*Settings*")
     st.write("- Caching: universes (6h), financials (30m).")
