@@ -12,10 +12,10 @@ from fuzzywuzzy import process
 # ---------- Page & Theme ----------
 
 st.set_page_config(
-    page_title="Global & India Financials",
+    page_title="FinXport",
     page_icon="📊",
     layout="wide",
-    menu_items={"about": "AI Financials — fetch, compare, and export financial statements fast."}
+    menu_items={"about": "Financials — fetch, compare, and export financial statements fast."}
 )
 
 # Minimal CSS polish
