@@ -10,8 +10,14 @@ from fuzzywuzzy import process
 # requirements: streamlit, yfinance, pandas, openpyxl, fuzzywuzzy, python-Levenshtein, requests, lxml
 
 # ---------- Page & Theme ----------
+
+# ✅ Privacy note at the very top
+st.warning(
+    "⚠ *Privacy Notice:* This app does not store your inputs.\n"
+    "Do not enter personal, confidential, or sensitive information."
+)
 st.set_page_config(
-    page_title="AI Financials • India & Global",
+    page_title="Global & India Financials", layout="wide",
     page_icon="📊",
     layout="wide",
     menu_items={"about": "AI Financials — fetch, compare, and export financial statements fast."}
@@ -63,7 +69,7 @@ if OPENAI_API_KEY:
     openai.api_key = OPENAI_API_KEY
 
 with st.expander("Privacy & notes", expanded=False):
-    st.write("• This app doesn’t store your inputs. If OpenAI parsing is enabled, your text may be sent to OpenAI just to extract names.\n"
+    st.write("• If OpenAI parsing is enabled, your text may be sent to OpenAI just to extract names.\n"
              "• Financials come from Yahoo Finance via yfinance. Some tickers may not expose statements.\n"
              "• Indian tickers (.NS) are displayed in ₹ Crore; global tickers in their reported currency.")
 
