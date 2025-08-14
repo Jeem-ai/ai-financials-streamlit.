@@ -1,1 +1,1 @@
-# FinXport-streamlit.
+# FinXport- Global and India financials-streamlit.
