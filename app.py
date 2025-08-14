@@ -17,7 +17,7 @@ st.warning(
     "Do not enter personal, confidential, or sensitive information."
 )
 st.set_page_config(
-    page_title="Global & India Financials", layout="wide",
+    page_title="Global & India Financials",
     page_icon="📊",
     layout="wide",
     menu_items={"about": "AI Financials — fetch, compare, and export financial statements fast."}
